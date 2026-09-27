@@ -44,20 +44,20 @@ sub exec {
 
   my ( $exec, $file, $shell );
   if ( my $ssh = Rex::is_ssh() ) {
-    if ( ref $ssh eq "Net::OpenSSH" ) {
-      $exec = Rex::Interface::Exec->create("OpenSSH");
-      $file = Rex::Interface::File->create("OpenSSH");
+    if ( ref $ssh eq 'Net::OpenSSH' ) {
+      $exec = Rex::Interface::Exec->create('OpenSSH');
+      $file = Rex::Interface::File->create('OpenSSH');
     }
     else {
-      $exec = Rex::Interface::Exec->create("SSH");
-      $file = Rex::Interface::File->create("SSH");
+      $exec = Rex::Interface::Exec->create('SSH');
+      $file = Rex::Interface::File->create('SSH');
     }
   }
   else {
-    $exec = Rex::Interface::Exec->create("Local");
-    $file = Rex::Interface::File->create("Local");
+    $exec = Rex::Interface::Exec->create('Local');
+    $file = Rex::Interface::File->create('Local');
   }
-  $shell = Rex::Interface::Shell->create("Sh");
+  $shell = Rex::Interface::Shell->create('Sh');
 
   my $doas_options =
     Rex::get_current_connection_object()->get_current_doas_options;
@@ -68,7 +68,7 @@ sub exec {
 
   if ( Rex::Config->get_sudo_without_locales() ) {
     Rex::Logger::debug(
-      "Using doas without locales. If the locale is NOT C or en_US it will break many things!"
+      'Using doas without locales. If the locale is NOT C or en_US it will break many things!'
     );
     $option->{no_locales} = 1;
   }
@@ -78,7 +78,7 @@ sub exec {
 
   if ( Rex::Config->get_sudo_without_sh() ) {
     Rex::Logger::debug(
-      "Using doas without sh will break things like file editing.");
+      'Using doas without sh will break things like file editing');
 
     $shell->set_inner_shell(0);
     $shell->set_doas_env(1);
@@ -89,7 +89,7 @@ sub exec {
   }
   else {
 
-    $shell->set_locale("C");
+    $shell->set_locale('C');
     $shell->path($path);
 
     if ( Rex::Config->get_source_global_profile ) {
@@ -120,15 +120,15 @@ sub _exec {
 
   my ( $exec, $file, $shell );
   if ( my $ssh = Rex::is_ssh() ) {
-    if ( ref $ssh eq "Net::OpenSSH" ) {
-      $exec = Rex::Interface::Exec->create("OpenSSH");
+    if ( ref $ssh eq 'Net::OpenSSH' ) {
+      $exec = Rex::Interface::Exec->create('OpenSSH');
     }
     else {
-      $exec = Rex::Interface::Exec->create("SSH");
+      $exec = Rex::Interface::Exec->create('SSH');
     }
   }
   else {
-    $exec = Rex::Interface::Exec->create("Local");
+    $exec = Rex::Interface::Exec->create('Local');
   }
 
   return $exec->_exec( $cmd, $option );

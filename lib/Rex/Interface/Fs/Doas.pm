@@ -17,7 +17,7 @@ use base qw(Rex::Interface::Fs::Sudo);
 
 sub _exec {
   my ( $self, $cmd, $path, $option ) = @_;
-  my $exec = Rex::Interface::Exec->create("Doas");
+  my $exec = Rex::Interface::Exec->create('Doas');
   return $exec->exec( $cmd, $path, $option );
 }
 

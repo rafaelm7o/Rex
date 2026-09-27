@@ -446,7 +446,7 @@ sub __help__ {
   printf $fmt, "-O", "Pass additional options, like CMDB path";
   printf $fmt, "-s", "Use sudo for every command";
   printf $fmt, "-S", "Password for sudo";
-  printf $fmt, "-D", "Use doas for every command";
+  printf $fmt, "-D", 'Use doas for every command';
   printf $fmt, "-t", "Number of threads to use (aka 'parallelism' param)";
   printf $fmt, "-v", "Display (R)?ex version";
   print "\n";

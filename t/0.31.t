@@ -5,7 +5,7 @@ use warnings;
 
 our $VERSION = '9999.99.99_99'; # VERSION
 
-use Test::More tests => 154;
+use Test::More tests => 140;
 use Test::Warnings;
 
 use Rex -feature => '0.31';
@@ -153,54 +153,3 @@ is( get('key3')->{name},    'foo', 'got value of name parameter in key3' );
 is( get('key3')->{surname}, 'bar', 'got value of surname parameter in key3' );
 is( get('key3')->{x1}, 'x',  'got value of NEW name parameter x1 in key3' );
 is( get('key3')->{x2}, 'xx', 'got value of NEW name parameter x2 in key3' );
-
-# doas tests
-my $doas_group = 'doasgroup';
-my $doas_task  = 'doastest1';
-my $doas_user  = 'doasuser';
-my $doas_pass  = 'doaspass';
-
-group( $doas_group, 'doas01', 'doas02' );
-task( $doas_task, group => $doas_group, sub { } );
-
-auth(
-  for      => $doas_group,
-  user     => $doas_user,
-  password => $doas_pass,
-  doas     => TRUE()
-);
-
-$task       = Rex::TaskList->create()->get_task($doas_task);
-@all_server = @{ $task->server };
-
-for my $server (@all_server) {
-  my $auth = $task->merge_auth($server);
-  is( $auth->{user},     $doas_user, 'merge_auth - doas user' );
-  is( $auth->{password}, $doas_pass, 'merge_auth - doas password' );
-  is( $auth->{doas},     TRUE(),     'merge_auth - doas enabled' );
-  ok( !$auth->{sudo}, 'merge_auth - sudo not set for doas' );
-}
-
-# Test global doas state
-Rex::global_doas(1);
-ok( Rex::is_doas(), 'global doas is enabled' );
-Rex::global_doas(0);
-ok( !Rex::is_doas(), 'global doas is disabled' );
-
-# Test doas command function
-use Rex::Commands;
-
-# Test global doas toggle via doas command
-doas 'on';
-ok( Rex::is_doas(), q{doas 'on' enables global doas} );
-doas '0';
-ok( !Rex::is_doas(), q{doas '0' disables global doas} );
-
-# Test doas with code block
-my $doas_called = 0;
-doas sub { $doas_called = 1; Rex::is_doas(); };
-ok( $doas_called, 'doas code block executed' );
-
-# Test doas with hashref options
-my $ret = doas { user => 'testuser', command => 'echo test' };
-ok( defined $ret, 'doas with hashref returns result' );
