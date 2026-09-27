@@ -20,6 +20,7 @@ sub new {
   bless( $self, $proto );
 
   $self->{__sudo_options__} = [];
+  $self->{__doas_options__} = [];
 
   return $self;
 }
@@ -115,6 +116,52 @@ sub run_sudo_unmodified {
   $self->push_sudo_options( {} );
   $code->();
   $self->pop_sudo_options();
+}
+
+sub push_doas_options {
+  my ( $self, @option ) = @_;
+  if ( ref $option[0] eq "HASH" ) {
+    push @{ $self->{__doas_options__} }, $option[0];
+  }
+  else {
+    push @{ $self->{__doas_options__} }, {@option};
+  }
+}
+
+sub get_current_doas_options {
+  my ($self) = @_;
+  return $self->{__doas_options__}->[-1];
+}
+
+sub push_use_doas {
+  my ( $self, $use ) = @_;
+  push @{ $self->{__use_doas__} }, $use;
+}
+
+sub get_current_use_doas {
+  my ($self) = @_;
+
+  if ( $self->{is_doas} ) {
+    return 1;
+  }
+  return $self->{__use_doas__}->[-1];
+}
+
+sub pop_doas_options {
+  my ($self) = @_;
+  pop @{ $self->{__doas_options__} };
+}
+
+sub pop_use_doas {
+  my ($self) = @_;
+  pop @{ $self->{__use_doas__} };
+}
+
+sub run_doas_unmodified {
+  my ( $self, $code ) = @_;
+  $self->push_doas_options( {} );
+  $code->();
+  $self->pop_doas_options();
 }
 
 1;

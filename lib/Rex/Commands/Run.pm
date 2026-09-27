@@ -14,6 +14,7 @@ With this module you can run a command.
 
  my $output = run 'ls -l';
  sudo 'id';
+ doas 'id';
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
@@ -71,7 +72,7 @@ BEGIN {
 use vars qw(@EXPORT);
 use base qw(Rex::Exporter);
 
-@EXPORT = qw(run can_run sudo);
+@EXPORT = qw(run can_run sudo doas);
 
 =head2 run($command [, $callback], %options)
 
@@ -489,6 +490,82 @@ sub sudo {
 
   Rex::get_current_connection_object()->pop_use_sudo();
   Rex::get_current_connection_object()->pop_sudo_options();
+
+  return $ret;
+}
+
+=head2 doas($command)
+
+This function will execute the given command with doas.
+
+With this function you can run a command as another user via doas.
+
+B<Note:> doas on OpenBSD does not support password input via stdin like sudo does.
+You must configure /etc/doas.conf appropriately for unattended execution.
+A typical configuration for a user to run commands as root without a password would be:
+
+  permit nopass myuser as root
+
+However, administrators should restrict rules appropriately for their security requirements.
+
+You can also pass a hash reference as first argument to specify options:
+
+ doas { user => 'root', command => 'id' };
+
+doas supports the following options:
+
+=over 4
+
+=item user
+
+The user to execute the command as.
+
+=item command
+
+The command to execute.
+
+=back
+
+To use doas without a password prompt (non-interactively), Rex uses the C<-n> option.
+Missing authorization will cause an immediate command failure.
+
+=cut
+
+sub doas {
+  my ($cmd) = @_;
+
+  my $options;
+  if ( ref $cmd eq "HASH" ) {
+    $options = $cmd;
+    $cmd     = $options->{command};
+  }
+
+  if ( $cmd eq "on" || $cmd eq "-on" || $cmd eq "1" ) {
+    Rex::Logger::debug("Turning doas globally on");
+    Rex::global_doas(1);
+    return;
+  }
+  elsif ( $cmd eq "0" ) {
+    Rex::Logger::debug("Turning doas globally off");
+    Rex::global_doas(0);
+    return;
+  }
+
+  Rex::get_current_connection_object()->push_use_doas(1);
+  Rex::get_current_connection_object()->push_doas_options( %{$options} );
+
+  my $ret;
+
+  # if doas is used with a code block
+  if ( ref($cmd) eq "CODE" ) {
+    $ret = &$cmd();
+  }
+  else {
+    $ret = i_run( $cmd, fail_ok => 1 );
+  }
+
+  Rex::get_current_connection_object()->pop_use_doas();
+  Rex::get_current_connection_object()->pop_doas_options();
 
   return $ret;
 }

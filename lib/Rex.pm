@@ -67,8 +67,10 @@ BEGIN {
   eval { Net::SSH2->require; };
 }
 
-our ( @EXPORT, @CONNECTION_STACK, $GLOBAL_SUDO, $MODULE_PATHS,
-  $WITH_EXIT_STATUS, @FEATURE_FLAGS );
+our (
+  @EXPORT,       @CONNECTION_STACK, $GLOBAL_SUDO, $GLOBAL_DOAS,
+  $MODULE_PATHS, $WITH_EXIT_STATUS, @FEATURE_FLAGS
+);
 
 $WITH_EXIT_STATUS = 1; # since 0.50 activated by default
 @FEATURE_FLAGS    = ();
@@ -380,6 +382,50 @@ sub is_sudo {
 sub global_sudo {
   my ($on) = @_;
   $GLOBAL_SUDO = $on;
+
+  # turn cache on
+  Rex::Config->set_use_cache(1);
+}
+
+=head2 is_doas
+
+Returns 1 if the current operation is executed within doas.
+
+=cut
+
+sub is_doas {
+
+  if ( $CONNECTION_STACK[-1] ) {
+    if ( exists $CONNECTION_STACK[-1]->{server}->{auth}->{doas}
+      && $CONNECTION_STACK[-1]->{server}->{auth}->{doas} == 1 )
+    {
+      return 1;
+    }
+    elsif ( exists $CONNECTION_STACK[-1]->{server}->{auth}->{doas}
+      && $CONNECTION_STACK[-1]->{server}->{auth}->{doas} == 0 )
+    {
+      return 0;
+    }
+  }
+
+  if ($GLOBAL_DOAS) { return 1; }
+
+  if ( $CONNECTION_STACK[-1] ) {
+    return $CONNECTION_STACK[-1]->{conn}->get_current_use_doas;
+  }
+
+  return 0;
+}
+
+=head2 global_doas
+
+Enable or disable doas globally.
+
+=cut
+
+sub global_doas {
+  my ($on) = @_;
+  $GLOBAL_DOAS = $on;
 
   # turn cache on
   Rex::Config->set_use_cache(1);
