@@ -43,19 +43,23 @@ sub exec {
   }
 
   my ( $exec, $file, $shell );
+  my $netOpenSSH = 'Net::OpenSSH'
+  my $openSSH = 'OpenSSH'
+  my $SSH = 'SSH'
+  my $local = 'Local'
   if ( my $ssh = Rex::is_ssh() ) {
-    if ( ref $ssh eq 'Net::OpenSSH' ) {
-      $exec = Rex::Interface::Exec->create('OpenSSH');
-      $file = Rex::Interface::File->create('OpenSSH');
+    if ( ref $ssh eq $netOpenSSH ) {
+      $exec = Rex::Interface::Exec->create($openSSH);
+      $file = Rex::Interface::File->create($openSSH);
     }
     else {
-      $exec = Rex::Interface::Exec->create('SSH');
-      $file = Rex::Interface::File->create('SSH');
+      $exec = Rex::Interface::Exec->create($SSH);
+      $file = Rex::Interface::File->create($SSH);
     }
   }
   else {
-    $exec = Rex::Interface::Exec->create('Local');
-    $file = Rex::Interface::File->create('Local');
+    $exec = Rex::Interface::Exec->create($local);
+    $file = Rex::Interface::File->create($local);
   }
   $shell = Rex::Interface::Shell->create('Sh');
 

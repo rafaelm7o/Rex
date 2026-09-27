@@ -12,8 +12,8 @@ our $VERSION = '9999.99.99_99'; # VERSION
 
 use base qw(Rex::Interface::File::Sudo);
 
-sub _fs {
-  return Rex::Interface::Fs->create('Doas');
-}
+#sub _fs {
+#  return Rex::Interface::Fs->create('Doas');
+#}
 
 1;
