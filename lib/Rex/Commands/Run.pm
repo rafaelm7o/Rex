@@ -207,7 +207,7 @@ sub run {
     for my $_cmd ( @{$cmd} ) {
       &run( $_cmd, @_ );
     }
-    return;
+    return undef;
   }
 
   my ( $code, $option );
@@ -246,7 +246,7 @@ sub run {
       }
     );
 
-    return;
+    return undef;
   }
 
   if ( exists $option->{command} ) {
@@ -467,12 +467,12 @@ sub sudo {
   if ( $cmd eq "on" || $cmd eq "-on" || $cmd eq "1" ) {
     Rex::Logger::debug("Turning sudo globally on");
     Rex::global_sudo(1);
-    return;
+    return undef;
   }
   elsif ( $cmd eq "0" ) {
     Rex::Logger::debug("Turning sudo globally off");
     Rex::global_sudo(0);
-    return;
+    return undef;
   }
 
   Rex::get_current_connection_object()->push_use_sudo(1);
@@ -501,7 +501,7 @@ This function will execute the given command with doas.
 With this function you can run a command as another user via doas.
 
 B<Note:> doas on OpenBSD does not support password input via stdin like sudo does.
-You must configure /etc/doas.conf appropriately for unattended execution.
+You must configure F</etc/doas.conf> appropriately for unattended execution.
 A typical configuration for a user to run commands as root without a password would be:
 
   permit nopass myuser as root
@@ -535,20 +535,20 @@ sub doas {
   my ($cmd) = @_;
 
   my $options;
-  if ( ref $cmd eq "HASH" ) {
+  if ( ref $cmd eq 'HASH' ) {
     $options = $cmd;
     $cmd     = $options->{command};
   }
 
-  if ( $cmd eq "on" || $cmd eq "-on" || $cmd eq "1" ) {
-    Rex::Logger::debug("Turning doas globally on");
+  if ( $cmd eq 'on' || $cmd eq '-on' || $cmd eq '1' ) {
+    Rex::Logger::debug('Turning doas globally on');
     Rex::global_doas(1);
-    return;
+    return undef;
   }
-  elsif ( $cmd eq "0" ) {
-    Rex::Logger::debug("Turning doas globally off");
+  elsif ( $cmd eq '0' ) {
+    Rex::Logger::debug('Turning doas globally off');
     Rex::global_doas(0);
-    return;
+    return undef;
   }
 
   Rex::get_current_connection_object()->push_use_doas(1);
@@ -557,7 +557,7 @@ sub doas {
   my $ret;
 
   # if doas is used with a code block
-  if ( ref($cmd) eq "CODE" ) {
+  if ( ref($cmd) eq 'CODE' ) {
     $ret = &$cmd();
   }
   else {

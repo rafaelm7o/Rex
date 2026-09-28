@@ -243,8 +243,10 @@ sub push_connection {
 }
 
 sub pop_connection {
-  pop @CONNECTION_STACK;
-  Rex::Logger::debug( "Connections in queue: " . scalar(@CONNECTION_STACK) );
+  my $connection = pop @CONNECTION_STACK;
+
+  Rex::Logger::debug( 'Connections in queue: ' . scalar @CONNECTION_STACK );
+  return $connection;
 }
 
 sub reconnect_lost_connections {
@@ -429,6 +431,7 @@ sub global_doas {
 
   # turn cache on
   Rex::Config->set_use_cache(1);
+  return 1;
 }
 
 =head2 get_sftp
