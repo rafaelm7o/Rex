@@ -21,21 +21,27 @@ use Rex::Helper::Path;
 
 use base 'Rex::Interface::Exec::Base';
 
-sub new {
-  my $that  = shift;
-  my $proto = ref($that) || $that;
-  my $self  = {@_};
+my $net_openssh = 'Net::OpenSSH';
+my $openssh     = 'OpenSSH';
+my $ssh_backend = 'SSH';
+my $local       = 'Local';
 
-  bless( $self, $proto );
+sub new {
+  my ( $that, @args ) = @_;
+
+  my $self  = {@args};
+  my $proto = ref $that || $that;
+
+  bless $self, $proto;
 
   return $self;
 }
 
-sub exec {
+sub exec { ## no critic (Subroutines::ProhibitBuiltinHomonyms)
   my ( $self, $cmd, $path, $option ) = @_;
 
   if ( exists $option->{cwd} ) {
-    $cmd = "cd " . $option->{cwd} . " && $cmd";
+    $cmd = 'cd ' . $option->{cwd} . " && $cmd";
   }
 
   if ( exists $option->{path} ) {
@@ -43,18 +49,14 @@ sub exec {
   }
 
   my ( $exec, $file, $shell );
-  my $netOpenSSH = 'Net::OpenSSH';
-  my $openSSH    = 'OpenSSH';
-  my $SSH        = 'SSH';
-  my $local      = 'Local';
   if ( my $ssh = Rex::is_ssh() ) {
-    if ( ref $ssh eq $netOpenSSH ) {
-      $exec = Rex::Interface::Exec->create($openSSH);
-      $file = Rex::Interface::File->create($openSSH);
+    if ( ref $ssh eq $net_openssh ) {
+      $exec = Rex::Interface::Exec->create($openssh);
+      $file = Rex::Interface::File->create($openssh);
     }
     else {
-      $exec = Rex::Interface::Exec->create($SSH);
-      $file = Rex::Interface::File->create($SSH);
+      $exec = Rex::Interface::Exec->create($ssh_backend);
+      $file = Rex::Interface::File->create($ssh_backend);
     }
   }
   else {
@@ -65,9 +67,9 @@ sub exec {
 
   my $doas_options =
     Rex::get_current_connection_object()->get_current_doas_options;
-  my $doas_options_str = "";
+  my $doas_options_str = q{};
   if ( exists $doas_options->{user} ) {
-    $doas_options_str .= " -u " . $doas_options->{user};
+    $doas_options_str .= ' -u ' . $doas_options->{user};
   }
 
   if ( Rex::Config->get_sudo_without_locales() ) {
@@ -119,20 +121,20 @@ sub exec {
   return $exec->direct_exec( $real_exec, $option );
 }
 
-sub _exec {
+sub _exec { ## no critic (Subroutines::ProhibitUnusedPrivateSubroutines)
   my ( $self, $cmd, $path, $option ) = @_;
 
   my ( $exec, $file, $shell );
   if ( my $ssh = Rex::is_ssh() ) {
-    if ( ref $ssh eq 'Net::OpenSSH' ) {
-      $exec = Rex::Interface::Exec->create('OpenSSH');
+    if ( ref $ssh eq $net_openssh ) {
+      $exec = Rex::Interface::Exec->create($openssh);
     }
     else {
-      $exec = Rex::Interface::Exec->create('SSH');
+      $exec = Rex::Interface::Exec->create($ssh_backend);
     }
   }
   else {
-    $exec = Rex::Interface::Exec->create('Local');
+    $exec = Rex::Interface::Exec->create($local);
   }
 
   return $exec->_exec( $cmd, $option );
