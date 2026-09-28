@@ -120,14 +120,14 @@ sub run_sudo_unmodified {
 
 sub push_doas_options {
   my ( $self, @option ) = @_;
-  if ( ref $option[0] eq "HASH" ) {
-    push @{ $self->{__doas_options__} }, $option[0];
-  }
-  else {
-    push @{ $self->{__doas_options__} }, {@option};
-  }
-}
 
+  my $value =
+    ref $option[0] eq 'HASH'
+    ? $option[0]
+    : {@option};
+
+  return push @{ $self->{__doas_options__} }, $value;
+}
 sub get_current_doas_options {
   my ($self) = @_;
   return $self->{__doas_options__}->[-1];
@@ -135,7 +135,8 @@ sub get_current_doas_options {
 
 sub push_use_doas {
   my ( $self, $use ) = @_;
-  push @{ $self->{__use_doas__} }, $use;
+
+  return push @{ $self->{__use_doas__} }, $use;
 }
 
 sub get_current_use_doas {
@@ -149,19 +150,19 @@ sub get_current_use_doas {
 
 sub pop_doas_options {
   my ($self) = @_;
-  pop @{ $self->{__doas_options__} };
+  return pop @{ $self->{__doas_options__} };
 }
 
 sub pop_use_doas {
   my ($self) = @_;
-  pop @{ $self->{__use_doas__} };
+  return pop @{ $self->{__use_doas__} };
 }
 
 sub run_doas_unmodified {
   my ( $self, $code ) = @_;
   $self->push_doas_options( {} );
   $code->();
-  $self->pop_doas_options();
+  return $self->pop_doas_options();
 }
 
 1;

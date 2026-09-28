@@ -49,7 +49,8 @@ sub set_sudo_env {
 
 sub set_doas_env {
   my ( $self, $doas_env ) = @_;
-  $self->{__doas_env__} = $doas_env;
+
+  return $self->{__doas_env__} = $doas_env;
 }
 
 sub detect {
