@@ -128,6 +128,7 @@ sub push_doas_options {
 
   return push @{ $self->{__doas_options__} }, $value;
 }
+
 sub get_current_doas_options {
   my ($self) = @_;
   return $self->{__doas_options__}->[-1];
