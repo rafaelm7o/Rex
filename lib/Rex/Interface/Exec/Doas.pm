@@ -43,10 +43,10 @@ sub exec {
   }
 
   my ( $exec, $file, $shell );
-  my $netOpenSSH = 'Net::OpenSSH'
-  my $openSSH = 'OpenSSH'
-  my $SSH = 'SSH'
-  my $local = 'Local'
+  my $netOpenSSH = 'Net::OpenSSH';
+  my $openSSH    = 'OpenSSH';
+  my $SSH        = 'SSH';
+  my $local      = 'Local';
   if ( my $ssh = Rex::is_ssh() ) {
     if ( ref $ssh eq $netOpenSSH ) {
       $exec = Rex::Interface::Exec->create($openSSH);
