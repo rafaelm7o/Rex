@@ -11,9 +11,9 @@ our $VERSION = '9999.99.99_99'; # VERSION
 
 use Rex::Interface::Fs;
 use Rex::Interface::Exec;
+use constant LAST_INDEX => -1;
 
 my $hash_ref_type = 'HASH';
-my $last_index    = -1;
 
 sub new {
   my $that  = shift;
@@ -88,7 +88,7 @@ sub push_sudo_options {
 
 sub get_current_sudo_options {
   my ($self) = @_;
-  return $self->{__sudo_options__}->[$last_index];
+  return $self->{__sudo_options__}->[LAST_INDEX];
 }
 
 sub push_use_sudo {
@@ -103,7 +103,7 @@ sub get_current_use_sudo {
   if ( $self->{is_sudo} ) {
     return 1;
   }
-  return $self->{__use_sudo__}->[$last_index];
+  return $self->{__use_sudo__}->[LAST_INDEX];
 }
 
 sub pop_sudo_options {
@@ -139,7 +139,7 @@ sub push_doas_options {
 
 sub get_current_doas_options {
   my ($self) = @_;
-  return $self->{__doas_options__}->[$last_index];
+  return $self->{__doas_options__}->[LAST_INDEX];
 }
 
 sub push_use_doas {
@@ -154,7 +154,7 @@ sub get_current_use_doas {
   if ( $self->{is_doas} ) {
     return 1;
   }
-  return $self->{__use_doas__}->[$last_index];
+  return $self->{__use_doas__}->[LAST_INDEX];
 }
 
 sub pop_doas_options {

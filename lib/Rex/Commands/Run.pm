@@ -59,6 +59,8 @@ use Rex::Interface::Exec;
 use Rex::Interface::Fs;
 use English qw(-no_match_vars);
 
+my $code_ref_type = 'CODE';
+
 BEGIN {
   if ( $^O !~ m/^MSWin/ ) {
     eval "use Expect";
@@ -204,10 +206,13 @@ sub run {
   my $cmd = shift;
 
   if ( ref $cmd eq "ARRAY" ) {
+    my $ret;
+
     for my $_cmd ( @{$cmd} ) {
-      &run( $_cmd, @_ );
+      run( $_cmd, @_ );
     }
-    return undef;
+
+    return $ret;
   }
 
   my ( $code, $option );
@@ -245,8 +250,8 @@ sub run {
         run( $option->{command} );
       }
     );
-
-    return undef;
+      $res_cmd = undef;
+      return $res_cmd;
   }
 
   if ( exists $option->{command} ) {
@@ -350,7 +355,7 @@ sub run {
     }
 
     if ($code) {
-      $out_ret = &$code( $out, $err );
+      $out_ret = $code->( $out, $err );
     }
 
     else {
@@ -482,7 +487,7 @@ sub sudo {
 
   # if sudo is used with a code block
   if ( ref($cmd) eq "CODE" ) {
-    $ret = &$cmd();
+    $ret = $cmd->();
   }
   else {
     $ret = i_run( $cmd, fail_ok => 1 );
@@ -534,7 +539,8 @@ Missing authorization will cause an immediate command failure.
 sub doas {
   my ($cmd) = @_;
 
-  my $options;
+  my $options = {};
+
   if ( ref $cmd eq 'HASH' ) {
     $options = $cmd;
     $cmd     = $options->{command};
@@ -542,13 +548,11 @@ sub doas {
 
   if ( $cmd eq 'on' || $cmd eq '-on' || $cmd eq '1' ) {
     Rex::Logger::debug('Turning doas globally on');
-    Rex::global_doas(1);
-    return undef;
+    return Rex::global_doas(1);
   }
   elsif ( $cmd eq '0' ) {
     Rex::Logger::debug('Turning doas globally off');
-    Rex::global_doas(0);
-    return undef;
+    return Rex::global_doas(0);
   }
 
   Rex::get_current_connection_object()->push_use_doas(1);
@@ -557,8 +561,8 @@ sub doas {
   my $ret;
 
   # if doas is used with a code block
-  if ( ref($cmd) eq 'CODE' ) {
-    $ret = &$cmd();
+  if ( ref $cmd eq $code_ref_type ) {
+    $ret = $cmd->();
   }
   else {
     $ret = i_run( $cmd, fail_ok => 1 );

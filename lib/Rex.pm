@@ -65,6 +65,8 @@ BEGIN {
   use File::Basename;
   use File::Spec;
   eval { Net::SSH2->require; };
+
+  use constant LAST_INDEX => -1;
 }
 
 our (
