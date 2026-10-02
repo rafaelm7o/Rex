@@ -67,6 +67,7 @@ BEGIN {
   eval { Net::SSH2->require; };
 
   use constant LAST_INDEX => -1;
+
 }
 
 our (
@@ -328,10 +329,10 @@ Returns 1 if the current connection is a ssh connection. 0 if not.
 =cut
 
 sub is_ssh {
-  if ( $CONNECTION_STACK[-1] ) {
-    my $ref = ref( $CONNECTION_STACK[-1]->{"conn"} );
+  if ( $CONNECTION_STACK[LAST_INDEX] ) {
+    my $ref = ref( $CONNECTION_STACK[LAST_INDEX]->{"conn"} );
     if ( $ref =~ m/SSH/ ) {
-      return $CONNECTION_STACK[-1]->{"conn"}->get_connection_object();
+      return $CONNECTION_STACK[LAST_INDEX]->{"conn"}->get_connection_object();
     }
   }
 
@@ -345,10 +346,10 @@ Returns 1 if the current connection is local. Otherwise 0.
 =cut
 
 sub is_local {
-  if ( $CONNECTION_STACK[-1] ) {
-    my $ref = ref( $CONNECTION_STACK[-1]->{"conn"} );
+  if ( $CONNECTION_STACK[LAST_INDEX] ) {
+    my $ref = ref( $CONNECTION_STACK[LAST_INDEX]->{"conn"} );
     if ( $ref =~ m/Local/ ) {
-      return $CONNECTION_STACK[-1]->{"conn"}->get_connection_object();
+      return $CONNECTION_STACK[LAST_INDEX]->{"conn"}->get_connection_object();
     }
   }
 
@@ -363,21 +364,21 @@ Returns 1 if the current operation is executed within sudo.
 
 sub is_sudo {
 
-  if ( exists $CONNECTION_STACK[-1]->{server}->{auth}->{sudo}
-    && $CONNECTION_STACK[-1]->{server}->{auth}->{sudo} == 1 )
+  if ( exists $CONNECTION_STACK[LAST_INDEX]->{server}->{auth}->{sudo}
+    && $CONNECTION_STACK[LAST_INDEX]->{server}->{auth}->{sudo} == 1 )
   {
     return 1;
   }
-  elsif ( exists $CONNECTION_STACK[-1]->{server}->{auth}->{sudo}
-    && $CONNECTION_STACK[-1]->{server}->{auth}->{sudo} == 0 )
+  elsif ( exists $CONNECTION_STACK[LAST_INDEX]->{server}->{auth}->{sudo}
+    && $CONNECTION_STACK[LAST_INDEX]->{server}->{auth}->{sudo} == 0 )
   {
     return 0;
   }
 
   if ($GLOBAL_SUDO) { return 1; }
 
-  if ( $CONNECTION_STACK[-1] ) {
-    return $CONNECTION_STACK[-1]->{conn}->get_current_use_sudo;
+  if ( $CONNECTION_STACK[LAST_INDEX] ) {
+    return $CONNECTION_STACK[LAST_INDEX]->{conn}->get_current_use_sudo;
   }
 
   return 0;
@@ -399,14 +400,14 @@ Returns 1 if the current operation is executed within doas.
 
 sub is_doas {
 
-  if ( $CONNECTION_STACK[-1] ) {
-    if ( exists $CONNECTION_STACK[-1]->{server}->{auth}->{doas}
-      && $CONNECTION_STACK[-1]->{server}->{auth}->{doas} == 1 )
+  if ( $CONNECTION_STACK[LAST_INDEX] ) {
+    if ( exists $CONNECTION_STACK[LAST_INDEX]->{server}->{auth}->{doas}
+      && $CONNECTION_STACK[LAST_INDEX]->{server}->{auth}->{doas} == 1 )
     {
       return 1;
     }
-    elsif ( exists $CONNECTION_STACK[-1]->{server}->{auth}->{doas}
-      && $CONNECTION_STACK[-1]->{server}->{auth}->{doas} == 0 )
+    elsif ( exists $CONNECTION_STACK[LAST_INDEX]->{server}->{auth}->{doas}
+      && $CONNECTION_STACK[LAST_INDEX]->{server}->{auth}->{doas} == 0 )
     {
       return 0;
     }
@@ -414,8 +415,8 @@ sub is_doas {
 
   if ($GLOBAL_DOAS) { return 1; }
 
-  if ( $CONNECTION_STACK[-1] ) {
-    return $CONNECTION_STACK[-1]->{conn}->get_current_use_doas;
+  if ( $CONNECTION_STACK[LAST_INDEX] ) {
+    return $CONNECTION_STACK[LAST_INDEX]->{conn}->get_current_use_doas;
   }
 
   return 0;
@@ -443,16 +444,16 @@ Returns the sftp object for the current ssh connection.
 =cut
 
 sub get_sftp {
-  if ( $CONNECTION_STACK[-1] ) {
-    return $CONNECTION_STACK[-1]->{"conn"}->get_fs_connection_object();
+  if ( $CONNECTION_STACK[LAST_INDEX] ) {
+    return $CONNECTION_STACK[LAST_INDEX]->{"conn"}->get_fs_connection_object();
   }
 
   return 0;
 }
 
 sub get_cache {
-  if ( $CONNECTION_STACK[-1] ) {
-    return $CONNECTION_STACK[-1]->{"cache"};
+  if ( $CONNECTION_STACK[LAST_INDEX] ) {
+    return $CONNECTION_STACK[LAST_INDEX]->{"cache"};
   }
 
   return Rex::Interface::Cache->create();

@@ -59,7 +59,10 @@ use Rex::Interface::Exec;
 use Rex::Interface::Fs;
 use English qw(-no_match_vars);
 
-my $code_ref_type = 'CODE';
+my $ref_code = 'CODE';
+my $ref_hash = 'HASH';
+my $on       = 'on';
+my $on_flag  = '-on';
 
 BEGIN {
   if ( $^O !~ m/^MSWin/ ) {
@@ -250,8 +253,8 @@ sub run {
         run( $option->{command} );
       }
     );
-      $res_cmd = undef;
-      return $res_cmd;
+    $res_cmd = undef;
+    return $res_cmd;
   }
 
   if ( exists $option->{command} ) {
@@ -464,37 +467,35 @@ sub sudo {
   my ($cmd) = @_;
 
   my $options;
-  if ( ref $cmd eq "HASH" ) {
+  my $ret;
+
+  if ( ref $cmd eq $ref_hash ) {
     $options = $cmd;
     $cmd     = $options->{command};
   }
 
-  if ( $cmd eq "on" || $cmd eq "-on" || $cmd eq "1" ) {
-    Rex::Logger::debug("Turning sudo globally on");
-    Rex::global_sudo(1);
-    return undef;
+  if ( $cmd eq $on || $cmd eq $on_flag || $cmd eq '1' ) {
+    Rex::Logger::debug('Turning sudo globally on');
+    Rex::global_doas(1);
   }
-  elsif ( $cmd eq "0" ) {
-    Rex::Logger::debug("Turning sudo globally off");
-    Rex::global_sudo(0);
-    return undef;
-  }
-
-  Rex::get_current_connection_object()->push_use_sudo(1);
-  Rex::get_current_connection_object()->push_sudo_options( %{$options} );
-
-  my $ret;
-
-  # if sudo is used with a code block
-  if ( ref($cmd) eq "CODE" ) {
-    $ret = $cmd->();
+  elsif ( $cmd eq '0' ) {
+    Rex::Logger::debug('Turning sudo globally off');
+    Rex::global_doas(0);
   }
   else {
-    $ret = i_run( $cmd, fail_ok => 1 );
-  }
+    Rex::get_current_connection_object()->push_use_doas(1);
+    Rex::get_current_connection_object()->push_doas_options( %{$options} );
 
-  Rex::get_current_connection_object()->pop_use_sudo();
-  Rex::get_current_connection_object()->pop_sudo_options();
+    if ( ref $cmd eq $ref_code ) {
+      $ret = $cmd->();
+    }
+    else {
+      $ret = i_run( $cmd, fail_ok => 1 );
+    }
+
+    Rex::get_current_connection_object()->pop_use_doas();
+    Rex::get_current_connection_object()->pop_doas_options();
+  }
 
   return $ret;
 }
@@ -541,12 +542,12 @@ sub doas {
 
   my $options = {};
 
-  if ( ref $cmd eq 'HASH' ) {
+  if ( ref $cmd eq $ref_hash ) {
     $options = $cmd;
     $cmd     = $options->{command};
   }
 
-  if ( $cmd eq 'on' || $cmd eq '-on' || $cmd eq '1' ) {
+  if ( $cmd eq $on || $cmd eq $on_flag || $cmd eq '1' ) {
     Rex::Logger::debug('Turning doas globally on');
     return Rex::global_doas(1);
   }
@@ -561,7 +562,7 @@ sub doas {
   my $ret;
 
   # if doas is used with a code block
-  if ( ref $cmd eq $code_ref_type ) {
+  if ( ref $cmd eq $ref_code ) {
     $ret = $cmd->();
   }
   else {
