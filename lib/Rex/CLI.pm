@@ -286,9 +286,12 @@ CHECK_OVERWRITE: {
     CORE::exit 0;
   }
 
+  my $enabled = "on";
+
+
   # turn sudo on with cli option s is used
   if ( exists $opts{'s'} ) {
-    sudo("on");
+    sudo($enabled);
   }
 
   if ( exists $opts{'S'} ) {
@@ -297,7 +300,7 @@ CHECK_OVERWRITE: {
 
   # turn doas on with cli option D is used
   if ( exists $opts{'D'} ) {
-    doas("on");
+    doas($enabled);
   }
 
   if ( exists $opts{'t'} ) {

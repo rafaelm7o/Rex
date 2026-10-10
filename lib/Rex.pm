@@ -398,7 +398,10 @@ Returns 1 if the current operation is executed within doas.
 
 sub is_doas {
   my $connection;
-  $connection = $CONNECTION_STACK[$#CONNECTION_STACK] if @CONNECTION_STACK;
+
+  if (@CONNECTION_STACK) {
+    $connection = $CONNECTION_STACK[-1]; ## no critic (TooMuchCode::ProhibitDuplicateLiteral)
+  }
 
   if ($connection) {
     if ( exists $connection->{server}->{auth}->{doas}
