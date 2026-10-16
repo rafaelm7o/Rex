@@ -288,7 +288,6 @@ CHECK_OVERWRITE: {
 
   my $enabled = "on";
 
-
   # turn sudo on with cli option s is used
   if ( exists $opts{'s'} ) {
     sudo($enabled);
