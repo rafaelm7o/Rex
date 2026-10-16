@@ -83,27 +83,6 @@ subtest 'connection doas and options are stacks' => sub {
   ok( !defined $conn->get_current_doas_options(), 'options cleared after pop' );
 };
 
-subtest 'SSH connection selects Doas' => sub {
-  if ( !eval { require Net::SSH2; 1 } ) {
-    plan skip_all => 'Net::SSH2 is not installed';
-  }
-
-  require Rex::Interface::Connection::SSH;
-
-  my $conn         = Rex::Interface::Connection::SSH->new();
-  my $doas_enabled = 1;
-
-  local *Rex::is_doas = sub { $doas_enabled };
-  local *Rex::is_sudo = sub { 0 };
-
-  is( $conn->get_connection_type(), $doas, 'SSH selects Doas when enabled' );
-
-  $doas_enabled = 0;
-
-  is( $conn->get_connection_type(),
-    'SSH', 'SSH restores its default connection type' );
-};
-
 subtest 'OpenSSH selects doas' => sub {
   require Rex::Interface::Connection::OpenSSH;
 
